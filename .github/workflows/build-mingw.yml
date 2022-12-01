@@ -35,7 +35,8 @@ jobs:
             gcc --version &&^
             cd voro++-0.4.6
             set PREFIX=%CD:\=/%/${{ env.installationPath }}
-            mingw32-make.exe install
+            set MAKE=mingw32-make.exe
+            %MAKE% install
             
       - name: Archive Release
         uses: thedoctor0/zip-release@master
