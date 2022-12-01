@@ -1,0 +1,52 @@
+name: cpp-cmake-mingw-prebuilt-release-actions-workflow
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+      - 'c*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build:
+    name: Create Release
+    runs-on: windows-2019
+    env:
+      libraryName: voropp
+      installationPath: voropp-installation
+      mingwTargetZip: voropp-${{ github.ref_name }}-mingw64-x86_64-posix-seh-rev0-8.1.0.zip
+    steps:
+      - name: curl voro++-0.4.6.tar.gz
+        shell: cmd
+        run: |
+          curl https://math.lbl.gov/voro++/download/dir/voro++-0.4.6.tar.gz -L --output voro++-0.4.6.tar.gz &&^
+          dir &&^
+          tar -xvf voro++-0.4.6.tar.gz
+          
+      - name: curl x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+        shell: cmd
+        run:  cd /d ${{ github.workspace }} && curl https://github.com/2641797006/c/blob/master/GCC-zip/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z?raw=true -L --output x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z && dir && 7z.exe x x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
+        
+      - name: set PATH, check mingw version, cmake generate, build and install
+        shell: cmd
+        run: |
+            set PATH=^
+            ${{ github.workspace }}\mingw64;^
+            ${{ github.workspace }}\mingw64\bin;
+            gcc --version &&^
+            cd voro++-0.4.6
+            set PREFIX=%CD:\=/%/${{ env.installationPath }}
+            mingw32-make.exe install
+            
+      - name: Archive Release
+        uses: thedoctor0/zip-release@master
+        with:
+          type: 'zip'
+          directory: "voro++-0.4.6/${{ env.installationPath }}"
+          filename: "${{ env.mingwTargetZip }}"
+          
+      - name: Release prebuilt
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "voro++-0.4.6/${{ env.installationPath }}/${{ env.mingwTargetZip }}"
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
