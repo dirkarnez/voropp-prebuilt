@@ -32,11 +32,11 @@ jobs:
             set PATH=^
             ${{ github.workspace }}\mingw64;^
             ${{ github.workspace }}\mingw64\bin;
+            copy "${{ github.workspace }}\mingw64\bin\mingw32-make.exe" "${{ github.workspace }}\mingw64\bin\make.exe" &&^
             gcc --version &&^
             cd voro++-0.4.6
             set PREFIX=%CD:\=/%/${{ env.installationPath }}
-            set MAKE=mingw32-make.exe
-            %MAKE% install
+            make install
             
       - name: Archive Release
         uses: thedoctor0/zip-release@master
