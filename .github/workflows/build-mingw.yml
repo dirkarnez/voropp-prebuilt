@@ -26,17 +26,22 @@ jobs:
         shell: cmd
         run:  cd /d ${{ github.workspace }} && curl https://github.com/2641797006/c/blob/master/GCC-zip/x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z?raw=true -L --output x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z && dir && 7z.exe x x86_64-8.1.0-release-posix-seh-rt_v6-rev0.7z
         
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          install: make autoconf automake libtool autogen perl
+          
+          
       - name: set PATH, check mingw version, cmake generate, build and install
-        shell: cmd
+        shell: msys2 {0}
         run: |
-            set PATH=^
-            ${{ github.workspace }}\mingw64;^
-            ${{ github.workspace }}\mingw64\bin;
-            copy "${{ github.workspace }}\mingw64\bin\mingw32-make.exe" "${{ github.workspace }}\mingw64\bin\make.exe" &&^
-            gcc --version &&^
-            cd voro++-0.4.6
-            set PREFIX=%CD:\=/%/${{ env.installationPath }}
-            make install
+            workspace=$(pwd) &&
+            export PATH="$workspace/mingw64:$workspace/mingw64/bin:$workspace/msys64/usr/bin:/usr/bin" &&
+            cd voro++-0.4.6 && 
+            g++ --version && 
+            export PREFIX="$(pwd)/${{ env.installationPath }}" &&
+            mingw32-make.exe install
             
       - name: Archive Release
         uses: thedoctor0/zip-release@master
