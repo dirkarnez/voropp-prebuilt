@@ -40,8 +40,7 @@ jobs:
             export PATH="$workspace/mingw64:$workspace/mingw64/bin:$workspace/msys64/usr/bin:/usr/bin" &&
             cd voro++-0.4.6 && 
             g++ --version && 
-            export PREFIX="$(pwd)/${{ env.installationPath }}" &&
-            mingw32-make.exe install
+            mingw32-make.exe PREFIX="$(pwd)/${{ env.installationPath }}" install
             
       - name: Archive Release
         uses: thedoctor0/zip-release@master
